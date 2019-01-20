@@ -1,15 +1,15 @@
 int n_corps = 2;
 float escala = 1.342*pow(10,-9);
 //Gravitational constraint
-float G = 6.647E-11;
+float G = 6.647*pow(10,-11)*escala;
 float anguloP = radians(270);
 float anguloS = radians(0);
 
 //Star
 Corp star;
-float wstar = 1.99E30*escala;
-float posxstar = 20*cos(anguloS);
-float posystar = 20*sin(anguloS);
+float wstar = 1.99*pow(10,30)*escala;
+float posxstar = 0;
+float posystar = 0;
 float widthstar = 10;
 float heightstar = 10;
 float speedXstar = 0;
@@ -18,7 +18,7 @@ float speedYstar = 0;
 
 //Planet
 Corp planet;
-float wplanet = 5.972E24*escala;
+float wplanet = 5.972*pow(10,24)*escala;
 float posxplanet = 150;
 float posyplanet = 50*sqrt(7);
 float widthplanet = 5;
@@ -49,7 +49,7 @@ void setup(){
   acceleration.y = 0;
   lasttimecheck = millis();
   timeinterval = 1000;
-  delta =0.01;
+  delta =0.001;
   speedXplanet = 3.99999;
   speedYplanet = -4.9999;
   star = new Corp(wstar,posxstar,posystar,speedXstar,speedYstar);
@@ -59,7 +59,7 @@ void setup(){
 void Gravitation(){
   
     
-  if(millis() > (lasttimecheck + timeinterval)){
+  if(millis() > (lasttimecheck + timeinterval)){ //<>//
    
     //PVector sumForce = sumOfAllForces(planet, star);
     fij = forceBetween(planet, star);
@@ -71,19 +71,17 @@ void Gravitation(){
     fij = forceBetween(star, planet);
     totalForce.x = totalForce.x + fij.x;
     totalForce.y = totalForce.y + fij.y;
-    println("Suma fuerzas de gravedad: ", totalForce);
+    
     //Centripetal Force
-    totalForce.x = totalForce.x + planet.mass * pow(planet.speed.x,2) / planet.position.mag();
+    totalForce.x = totalForce.x + planet.mass * pow(planet.speed.x,2) / planet.position.mag(); //<>//
     totalForce.y = totalForce.y + planet.mass * pow(planet.speed.y,2) / planet.position.mag();
     
     //Centrifuge Force
-    totalForce.x = totalForce.x - planet.mass * pow(planet.speed.x,2) / planet.position.mag();
-    totalForce.y = totalForce.y - planet.mass * pow(planet.speed.y,2) / planet.position.mag();
-    
+    totalForce.x = totalForce.x + planet.mass * pow(planet.speed.x,2) / planet.position.mag();
+    totalForce.y = totalForce.y + planet.mass * pow(planet.speed.y,2) / planet.position.mag();
     
     PVector.div(totalForce ,planet.mass, acceleration);
-    
-    println("Distancia: ", dist(planet.position.x,planet.position.y,star.position.x,star.position.y));
+    println("BEFORE: ","Force: ", totalForce,"Accel: ",acceleration, "Speed: ",planet.speed, "Pos: ",planet.position);
     println("Angulo entre vector de velocidad tangencial y vector radial: ",degrees(PVector.angleBetween(planet.position, planet.speed)));
     //Draw planet
     stroke(0);
@@ -95,7 +93,8 @@ void Gravitation(){
     //Update position
     planet.position.x = planet.position.x + planet.speed.x * delta;
     planet.position.y = planet.position.y + planet.speed.y * delta;
-    println("STATS Force: ", totalForce,"Accel: ",acceleration, "Speed: ",planet.speed, "Pos: ",planet.position);
+    println("AFTER: ","Force: ", totalForce,"Accel: ",acceleration, "Speed: ",planet.speed, "Pos: ",planet.position);
+    //anguloP = anguloP + radians(delta);
     //Restart sums
     totalForce.x = 0;
     totalForce.y = 0;
@@ -114,6 +113,7 @@ PVector forceBetween(Corp ci, Corp cj){
   float rijMag = rij.mag();
   PVector UnitaryVector = rij.normalize();
   PVector Fij = UnitaryVector.mult(- G * ci.mass * cj.mass).div(pow(rijMag,2));
+  println("Distancia: ", rijMag,"Fuerza: ",Fij);
   return Fij;
   
 }
@@ -147,15 +147,11 @@ PVector sumOfAllForces(Corp ci, Corp cj){
 
 
 void draw(){
-  //background(255);
+  background(255);
   translate(400,400);
   stroke(0);
   fill(255,0,0);
-  ellipse(posystar,posystar,widthstar,heightstar);
-  //Arreglar esta rotacion para que estrella gire
-  posxstar = 20*cos(anguloS*delta);
-  posystar = 20*sin(anguloS*delta);
-  anguloS = anguloS + radians(90);
+  ellipse(0,0,widthstar,heightstar);
   Gravitation();
   
 }
